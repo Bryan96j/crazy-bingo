@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="screen-orientation" content="landscape" />
+<meta name="x5-orientation" content="landscape" />
+<meta name="full-screen" content="true" />
+<meta name="x5-fullscreen" content="true" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bingo</title>
+
+<style>
+  :root{
+    --bg:#1d1f23;
+    --panel-1: #2a2c31;
+    --primary: #007bff;
+    --highlight: #00ff2f;
+    --danger: #ff5555;
+    --text: #ffffff;
+    --muted: #cccccc;
+    --border: #3a3c42;
+  }
+
+  *{box-sizing:border-box}
+  html,body{
+    margin:0;
+    height:100%;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 42px;
+  }
+
+  button {font-family:inherit;}
+
+  .app {
+    display:flex;
+    height:100vh;
+    width:100vw;
+  }
+
+  /* ---------- Bienvenida ---------- */
+  .welcome {
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,0.8);
+    flex-direction:column;
+    z-index:40;
+  }
+  .welcome-card {
+    background: var(--panel-1);
+    border-radius:16px;
+    padding:30px;
+    text-align:center;
+    border:2px solid var(--primary);
+    box-shadow:0 0 20px rgba(0,0,0,0.5);
+    width:min(700px,90vw);
+  }
+  .title {
+    font-size:62px;
+    font-weight:bold;
+    color: var(--highlight);
+    margin-bottom:10px;
+  }
+  .subtitle {
+    color: var(--muted);
+    margin-bottom:42px;
+  }
+  .btn-big {
+    background: var(--primary);
+    color:#fff;
+    border:none;
+    padding:14px 26px;
+    border-radius:10px;
+    font-size:20px;
+    cursor:pointer;
+  }
+  .btn-small {
+    background: transparent;
+    color: var(--muted);
+    border:1px solid var(--border);
+    padding:10px 18px;
+    border-radius:10px;
+    cursor:pointer;
+  }
+
+  /* ---------- Modales ---------- */
+  .overlay {
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:60;
+  }
+  .overlay.show {display:flex;}
+  .modal {
+    background: var(--panel-1);
+    border:2px solid var(--primary);
+    border-radius:12px;
+    padding:20px;
+    width:min(480px,90vw);
+    text-align:center;
+  }
+  .modal h3{color:var(--highlight); margin:0 0 10px;}
+  .modal p{color:var(--muted); margin-bottom:20px;}
+  .modal .modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .btn {padding:10px 16px;border-radius:8px;border:none;cursor:pointer;font-size:16px;}
+  .btn-accept {background:var(--primary);color:#fff;}
+  .btn-cancel {background:#444;color:#fff;}
+  .btn-danger {background:var(--danger);color:#fff;}
+
+  /* ---------- Layout ---------- */
+  .left {
+    width:50%;
+    background: var(--panel-1);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:20px;
+    padding:20px;
+    border-right:2px solid var(--border);
+  }
+  .right {
+    width:50%;
+    padding:20px;
+    overflow-y:auto;
+  }
+
+  #current-number {
+    font-size: clamp(100px, 18vw, 220px);
+    font-weight:bold;
+    color: var(--highlight);
+    text-shadow: 0 0 10px rgba(255,255,255,0.3);
+  }
+
+  .controls {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+  }
+  input[type=number]{
+    width:200px;
+    font-size:30px;
+    padding:10px;
+    border-radius:10px;
+    text-align:center;
+    border:2px solid var(--primary);
+    background:#fff;
+    color:#000;
+  }
+
+  .row {
+    display:flex;
+    gap:10px;
+  }
+
+  .btn-accept {
+    background: var(--primary);
+    color:#fff;
+    border:none;
+    font-size:20px;
+    padding:12px 18px;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  .btn-bingo {
+    background: var(--highlight);
+    color:#000;
+    border:none;
+    font-size:18px;
+    padding:10px 18px;
+    border-radius:8px;
+    cursor:pointer;
+  }
+
+  #board {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    grid-auto-rows: 60px;
+    gap: 8px;
+    justify-items: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+  }
+  .number {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eee;
+    color: #000;
+    font-size: 24px;
+    border-radius: 8px;
+    border: 2px solid #ccc;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  .number.marked {
+    background: var(--highlight);
+    color: #000;
+    font-weight: bold;
+    border-color: #000;
+    transform: scale(1.1);
+  }
+
+  .restart-fixed {
+    position:fixed;
+    left:15px;
+    bottom:15px;
+    z-index:80;
+  }
+  .restart-btn {
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    background: var(--primary);
+    color:#fff;
+    font-size:28px;
+    border:none;
+    cursor:pointer;
+  }
+
+  .muted-help{color:var(--muted);font-size:14px;text-align:center;}
+
+  @media (max-width:720px){
+    .app{flex-direction:column;}
+    .left,.right{width:100%;height:50vh;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ---------- Bienvenida ---------- -->
+<div class="welcome" id="welcomeScreen">
+  <div class="welcome-card">
+    <div class="title">Crazy Bingo</div>
+    <div class="subtitle">No nos hacemos responsables por los daños y peleas</div>
+    <p style="color:var(--muted)">Ideal para proyectar en TV y jugar.</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn-big" id="btnIngresar">Ingresar</button>
+      <button class="btn-small" id="btnInfo">¿Cómo usar?</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- Modal ---------- -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- ---------- App principal ---------- -->
+<div class="app" id="appRoot" aria-hidden="true">
+  <div class="left">
+    <div id="current-number">--</div>
+    <div class="controls">
+      <input id="inputNumber" type="number" min="1" max="90" placeholder="Número" />
+      <div class="row">
+        <button class="btn-accept" id="btnAccept">Aceptar</button>
+        <button class="btn-bingo" id="btnBingo">🎉 Bingo</button>
+      </div>
+      <div class="muted-help">Mantén presionado un número 5s para eliminarlo.</div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div id="board"></div>
+  </div>
+</div>
+
+<div class="restart-fixed">
+  <button class="restart-btn" id="btnRestart">↻</button>
+</div>
+
+<script>
+const welcomeScreen = document.getElementById('welcomeScreen');
+const appRoot = document.getElementById('appRoot');
+const overlay = document.getElementById('overlay');
+const modalContent = document.getElementById('modalContent');
+const btnIngresar = document.getElementById('btnIngresar');
+const btnInfo = document.getElementById('btnInfo');
+const board = document.getElementById('board');
+const currentNumberEl = document.getElementById('current-number');
+const inputNumber = document.getElementById('inputNumber');
+const btnAccept = document.getElementById('btnAccept');
+const btnBingo = document.getElementById('btnBingo');
+const btnRestart = document.getElementById('btnRestart');
+
+let totalNumeros = 90;
+let markedSet = new Set();
+let longPressDuration = 5000;
+
+/* ---------- Modal ---------- */
+function showModal({ title='', message='', buttons=[{text:'OK',action:()=>closeModal()}] }){
+  const htmlButtons = buttons.map((b,i)=>`<button class="btn ${b.class||'btn-accept'}" data-i="${i}">${b.text}</button>`).join('');
+  modalContent.innerHTML = `<h3>${title}</h3><p>${message}</p><div class="modal-actions">${htmlButtons}</div>`;
+  overlay.classList.add('show');
+  modalContent.querySelectorAll('button').forEach(btn=>{
+    btn.onclick=()=>{buttons[parseInt(btn.dataset.i)].action()};
+  });
+}
+function closeModal(){overlay.classList.remove('show');}
+
+/* ---------- Inicio ---------- */
+btnIngresar.onclick=()=>{
+  showModal({
+    title:'Selecciona tipo de bingo',
+    message:'Elige cuántos números tendrá el tablero.',
+    buttons:[
+      {text:'30',action:()=>startGame(30)},
+      {text:'75',action:()=>startGame(75)},
+      {text:'80',action:()=>startGame(80)},
+      {text:'90',action:()=>startGame(90)},
+      {text:'100',action:()=>startGame(100)},
+      {text:'Cancelar',class:'btn-cancel',action:()=>closeModal()}
+    ]
+  });
+};
+
+btnInfo.onclick=()=>{
+  showModal({
+    title:'Instrucciones',
+    message:`1) Presiona "Ingresar" y elige tipo de bingo.<br>
+             2) Ingresa el número extraído y presiona "Aceptar".<br>
+             3) El número se marcará en el tablero.<br>
+             4) Mantén presionado un número 5s para eliminarlo.`,
+    buttons:[{text:'Entendido',action:()=>closeModal()}]
+  });
+};
+
+/* ---------- Crear tablero ---------- */
+function startGame(n){
+  closeModal();
+  totalNumeros=n;
+  markedSet.clear();
+  board.innerHTML='';
+  for(let i=1;i<=n;i++){
+    const d=document.createElement('div');
+    d.className='number';
+    d.textContent=i;
+    d.id=`num-${i}`;
+    attachLongPress(d,i);
+    board.appendChild(d);
+  }
+  welcomeScreen.style.display='none';
+  appRoot.style.display='flex';
+  appRoot.setAttribute('aria-hidden','false');
+  currentNumberEl.textContent='--';
+  inputNumber.value='';
+  inputNumber.focus();
+}
+
+function attachLongPress(el,num){
+  let timer;
+  const start=()=>{
+    if(!el.classList.contains('marked'))return;
+    timer=setTimeout(()=>{
+      showModal({
+        title:'Eliminar número',
+        message:`¿Quitar el número ${num}?`,
+        buttons:[
+          {text:'Eliminar',class:'btn-danger',action:()=>{unmark(num);closeModal();}},
+          {text:'Cancelar',class:'btn-cancel',action:()=>closeModal()}
+        ]
+      });
+    },longPressDuration);
+  };
+  const cancel=()=>clearTimeout(timer);
+  el.addEventListener('mousedown',start);
+  el.addEventListener('mouseup',cancel);
+  el.addEventListener('mouseleave',cancel);
+  el.addEventListener('touchstart',start);
+  el.addEventListener('touchend',cancel);
+  el.addEventListener('touchcancel',cancel);
+}
+
+function unmark(n){
+  markedSet.delete(n);
+  const e=document.getElementById(`num-${n}`);
+  if(e)e.classList.remove('marked');
+}
+
+/* ---------- Aceptar ---------- */
+btnAccept.onclick=()=>addNumber();
+inputNumber.addEventListener('keydown',e=>{if(e.key==='Enter'){addNumber();}});
+
+function addNumber(){
+  const n=parseInt(inputNumber.value);
+  if(isNaN(n)||n<1||n>totalNumeros){
+    showModal({title:'Número inválido',message:`Ingresa un número entre 1 y ${totalNumeros}.`,buttons:[{text:'OK',action:()=>closeModal()}]});
+    return;
+  }
+  if(markedSet.has(n)){
+    showModal({title:'Número repetido',message:`El número ${n} ya fue marcado.`,buttons:[{text:'OK',action:()=>closeModal()}]});
+    return;
+  }
+  markedSet.add(n);
+  document.getElementById(`num-${n}`).classList.add('marked');
+  currentNumberEl.textContent=n;
+  inputNumber.value='';
+  inputNumber.focus();
+}
+
+/* ---------- Bingo ---------- */
+btnBingo.onclick=()=>{
+  showModal({
+    title:'¡BINGO! 🎉',
+    message:'¡Felicidades! ya no hay premios',
+    buttons:[
+      {text:'Sí, reiniciar',action:()=>{restart();closeModal();}},
+      {text:'Cancelar',class:'btn-cancel',action:()=>closeModal()}
+    ]
+  });
+};
+
+/* ---------- Reiniciar ---------- */
+btnRestart.onclick=()=>{
+  showModal({
+    title:'Opciones',
+    message:'¿Reiniciar o volver al menú principal?',
+    buttons:[
+      {text:'Reiniciar bingo',action:()=>{restart();closeModal();}},
+      {text:'Menú principal',class:'btn-cancel',action:()=>{toMenu();closeModal();}},
+      {text:'Cancelar',class:'btn-cancel',action:()=>closeModal()}
+    ]
+  });
+};
+
+function restart(){
+  markedSet.forEach(n=>{
+    const e=document.getElementById(`num-${n}`);
+    if(e)e.classList.remove('marked');
+  });
+  markedSet.clear();
+  currentNumberEl.textContent='--';
+  inputNumber.value='';
+}
+
+function toMenu(){
+  restart();
+  appRoot.style.display='none';
+  welcomeScreen.style.display='flex';
+  appRoot.setAttribute('aria-hidden','true');
+}
+</script>
+</body>
+</html>
