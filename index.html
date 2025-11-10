@@ -1,655 +1,556 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="screen-orientation" content="landscape" />
-<meta name="x5-orientation" content="landscape" />
-<meta name="full-screen" content="true" />
-<meta name="x5-fullscreen" content="true" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Bingo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen">
+    <meta name="theme-color" content="#1e3a5f">
+    <title>Bingo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: manipulation;
+        }
 
-<style>
-  :root{
-    --bg:#1d1f23;
-    --panel-1: #2a2c31;
-    --primary: #007bff;
-    --highlight: #00ff2f;
-    --danger: #ff5555;
-    --text: #ffffff;
-    --muted: #cccccc;
-    --border: #3a3c42;
-  }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+            color: #fff;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+        }
 
-  *{box-sizing:border-box}
-  html,body{
-    margin:0;
-    height:100%;
-    font-family: Arial, Helvetica, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    font-size: 42px;
-  }
+        /* Pantalla de Bienvenida */
+        #welcomeScreen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            text-align: center;
+            padding: 20px;
+        }
 
-  button {font-family:inherit;}
+        #welcomeScreen h1 {
+            font-size: clamp(2rem, 8vw, 6rem);
+            margin-bottom: 3vh;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
 
-  .app {
-    display:flex;
-    height:100vh;
-    width:100vw;
-    position: relative;
-  }
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: clamp(15px, 3vh, 30px) clamp(30px, 6vw, 60px);
+            font-size: clamp(1.2rem, 3vw, 2.5rem);
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+            font-weight: bold;
+        }
 
-  /* ---------- Bienvenida ---------- */
-  .welcome {
-    position:fixed;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:rgba(0,0,0,0.8);
-    flex-direction:column;
-    z-index:40;
-  }
-  .welcome-card {
-    background: var(--panel-1);
-    border-radius:16px;
-    padding:30px;
-    text-align:center;
-    border:2px solid var(--primary);
-    box-shadow:0 0 20px rgba(0,0,0,0.5);
-    width:min(700px,90vw);
-  }
-  .title {
-    font-size:62px;
-    font-weight:bold;
-    color: var(--highlight);
-    margin-bottom:10px;
-  }
-  .subtitle {
-    color: var(--muted);
-    margin-bottom:42px;
-  }
-  .btn-big {
-    background: var(--primary);
-    color:#fff;
-    border:none;
-    padding:14px 26px;
-    border-radius:10px;
-    font-size:20px;
-    cursor:pointer;
-  }
-  .btn-small {
-    background: transparent;
-    color: var(--muted);
-    border:1px solid var(--border);
-    padding:10px 18px;
-    border-radius:10px;
-    cursor:pointer;
-  }
+        .btn-primary:active {
+            transform: scale(0.95);
+        }
 
-  /* ---------- Modales ---------- */
-  .overlay {
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.6);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:60;
-  }
-  .overlay.show {display:flex;}
-  .modal {
-    background: var(--panel-1);
-    border:2px solid var(--primary);
-    border-radius:12px;
-    padding:20px;
-    width:min(480px,90vw);
-    text-align:center;
-  }
-  .modal h3{color:var(--highlight); margin:0 0 10px;}
-  .modal p{color:var(--muted); margin-bottom:20px;}
-  .modal .modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
-  .btn {padding:10px 16px;border-radius:8px;border:none;cursor:pointer;font-size:16px;}
-  .btn-accept {background:var(--primary);color:#fff;}
-  .btn-cancel {background:#444;color:#fff;}
-  .btn-danger {background:var(--danger);color:#fff;}
+        /* Pantalla Principal */
+        #mainScreen {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+            flex-direction: row;
+        }
 
-  /* ---------- Layout ---------- */
-  .left {
-    width:25%;
-    background: var(--panel-1);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-    padding:10px;
-    border-right:2px solid var(--border);
-  }
-  .right {
-    width:75%;
-    padding:10px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
+        #leftPanel {
+            width: 25%;
+            background: #2c5282;
+            display: flex;
+            flex-direction: column;
+            padding: 1vh;
+            gap: 1vh;
+        }
 
-  #current-number {
-    font-size: clamp(50px, 12vw, 120px);
-    font-weight:bold;
-    color: var(--highlight);
-    text-shadow: 0 0 10px rgba(255,255,255,0.3);
-    text-align: center;
-  }
+        #currentNumber {
+            flex: 0 0 25%;
+            background: #fff;
+            color: #1e3a5f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(3rem, 12vh, 8rem);
+            font-weight: bold;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
 
-  .controls {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:8px;
-    width: 100%;
-  }
-  
-  /* Teclado virtual para evitar que aparezca el teclado del sistema */
-  .virtual-keyboard {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
-    width: 100%;
-    max-width: 180px;
-  }
-  
-  .key {
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 0;
-    font-size: 16px;
-    cursor: pointer;
-    min-height: 35px;
-  }
-  
-  .key-wide {
-    grid-column: span 2;
-  }
+        #keyboard {
+            flex: 0 0 50%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1vh;
+        }
 
-  .key-delete {
-    background: var(--danger);
-  }
+        .key {
+            background: #4a90e2;
+            border: none;
+            border-radius: 8px;
+            font-size: clamp(1.5rem, 4vh, 3rem);
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
 
-  .key-enter {
-    background: var(--highlight);
-    color: #000;
-  }
+        .key:active {
+            transform: scale(0.95);
+            background: #357abd;
+        }
 
-  .number-display {
-    width: 100%;
-    max-width: 180px;
-    font-size: 24px;
-    padding: 8px;
-    border-radius: 8px;
-    text-align: center;
-    border: 2px solid var(--primary);
-    background: #fff;
-    color: #000;
-    margin-bottom: 5px;
-  }
+        .key.wide {
+            grid-column: span 2;
+        }
 
-  .row {
-    display:flex;
-    gap:5px;
-    justify-content: center;
-    width: 100%;
-  }
+        .key.accept {
+            background: #4CAF50;
+        }
 
-  .btn-accept {
-    background: var(--primary);
-    color:#fff;
-    border:none;
-    font-size:16px;
-    padding:8px 12px;
-    border-radius:8px;
-    cursor:pointer;
-    flex: 1;
-  }
-  .btn-bingo {
-    background: var(--highlight);
-    color:#000;
-    border:none;
-    font-size:14px;
-    padding:8px 12px;
-    border-radius:8px;
-    cursor:pointer;
-    flex: 1;
-  }
+        .key.accept:active {
+            background: #45a049;
+        }
 
-  #board-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    width: 100%;
-  }
+        .key.delete {
+            background: #f44336;
+        }
 
-  #board {
-    display: grid;
-    gap: 6px;
-    justify-items: center;
-    align-items: center;
-    margin: auto;
-    /* El tamaño se calculará dinámicamente con JavaScript */
-  }
-  
-  .number {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #ffffff;
-    color: #000;
-    border-radius: 8px;
-    border: 2px solid #cccccc;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    font-weight: bold;
-    /* El tamaño se calculará dinámicamente con JavaScript */
-    width: 100%;
-    height: 100%;
-  }
-  
-  .number:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  }
-  
-  .number.marked {
-    background: var(--highlight);
-    color: #000;
-    font-weight: bold;
-    border-color: #000;
-    transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(0, 255, 47, 0.5);
-  }
+        .key.delete:active {
+            background: #da190b;
+        }
 
-  /* Botón de reinicio en la esquina superior izquierda */
-  .restart-top-left {
-    position: absolute;
-    left: 15px;
-    top: 15px;
-    z-index: 80;
-  }
-  
-  .restart-btn {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: var(--primary);
-    color: #fff;
-    font-size: 24px;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+        #controls {
+            flex: 0 0 20%;
+            display: flex;
+            flex-direction: column;
+            gap: 1vh;
+        }
 
-  .muted-help{color:var(--muted);font-size:10px;text-align:center;}
+        .btn-control {
+            flex: 1;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: clamp(1rem, 2.5vh, 2rem);
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
 
-  @media (max-width:720px){
-    .app{flex-direction:column;}
-    .left,.right{width:100%;}
-    .left{height:25vh;}
-    .right{height:75vh;}
-    
-    /* Ajustes adicionales para móviles */
-    #current-number {
-      font-size: clamp(40px, 15vw, 80px);
-    }
-    
-    .virtual-keyboard {
-      max-width: 100%;
-    }
-    
-    #board {
-      gap: 4px;
-    }
-    
-    .restart-top-left {
-      left: 10px;
-      top: 10px;
-    }
-    
-    .restart-btn {
-      width: 40px;
-      height: 40px;
-      font-size: 20px;
-    }
-  }
-</style>
+        .btn-control:active {
+            transform: scale(0.95);
+        }
+
+        .btn-control.reset {
+            background: #ff9800;
+        }
+
+        .btn-control.menu {
+            background: #9e9e9e;
+        }
+
+        #rightPanel {
+            width: 75%;
+            background: #1e3a5f;
+            padding: 1vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #board {
+            display: grid;
+            gap: 0.5vh;
+            width: 100%;
+            height: 100%;
+            padding: 1vh;
+        }
+
+        .number-cell {
+            background: #fff;
+            color: #1e3a5f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(1rem, 3vh, 3rem);
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .number-cell.selected {
+            background: #4CAF50;
+            color: white;
+            transform: scale(0.95);
+        }
+
+        /* Modal personalizado */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+            padding: clamp(20px, 4vh, 40px);
+            border-radius: 15px;
+            text-align: center;
+            min-width: 60vw;
+            max-width: 80vw;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+        }
+
+        .modal-content h2 {
+            font-size: clamp(1.5rem, 4vh, 3rem);
+            margin-bottom: 2vh;
+        }
+
+        .modal-content p {
+            font-size: clamp(1.2rem, 3vh, 2rem);
+            margin-bottom: 3vh;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 2vw;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .modal-btn {
+            padding: clamp(10px, 2vh, 20px) clamp(20px, 4vw, 40px);
+            font-size: clamp(1rem, 2.5vh, 2rem);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            min-width: 120px;
+        }
+
+        .modal-btn.confirm {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .modal-btn.cancel {
+            background: #f44336;
+            color: white;
+        }
+
+        .modal-btn.neutral {
+            background: #2196F3;
+            color: white;
+        }
+
+        .number-options {
+            display: flex;
+            gap: 2vw;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 3vh 0;
+        }
+
+        .number-option {
+            padding: clamp(15px, 3vh, 25px) clamp(25px, 5vw, 40px);
+            font-size: clamp(1.5rem, 3.5vh, 2.5rem);
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            min-width: 100px;
+        }
+
+        .number-option:active {
+            transform: scale(0.95);
+        }
+    </style>
 </head>
 <body>
-
-<!-- ---------- Bienvenida ---------- -->
-<div class="welcome" id="welcomeScreen">
-  <div class="welcome-card">
-    <div class="title">Crazy Bingo</div>
-    <div class="subtitle">No nos hacemos responsables por los daños y peleas</div>
-    <p style="color:var(--muted)">Ideal para proyectar en TV y jugar.</p>
-    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-      <button class="btn-big" id="btnIngresar">Ingresar</button>
-      <button class="btn-small" id="btnInfo">¿Cómo usar?</button>
+    <!-- Pantalla de Bienvenida -->
+    <div id="welcomeScreen">
+        <h1>🎉 BINGO 🎉</h1>
+        <button class="btn-primary" onclick="showNumberSelection()">INGRESAR</button>
     </div>
-  </div>
-</div>
 
-<!-- ---------- Modal ---------- -->
-<div class="overlay" id="overlay">
-  <div class="modal" id="modalContent"></div>
-</div>
+    <!-- Pantalla Principal -->
+    <div id="mainScreen">
+        <!-- Panel Izquierdo (25%) -->
+        <div id="leftPanel">
+            <div id="currentNumber">-</div>
+            <div id="keyboard">
+                <button class="key" onclick="addDigit('1')">1</button>
+                <button class="key" onclick="addDigit('2')">2</button>
+                <button class="key" onclick="addDigit('3')">3</button>
+                <button class="key" onclick="addDigit('4')">4</button>
+                <button class="key" onclick="addDigit('5')">5</button>
+                <button class="key" onclick="addDigit('6')">6</button>
+                <button class="key" onclick="addDigit('7')">7</button>
+                <button class="key" onclick="addDigit('8')">8</button>
+                <button class="key" onclick="addDigit('9')">9</button>
+                <button class="key delete" onclick="deleteDigit()">←</button>
+                <button class="key" onclick="addDigit('0')">0</button>
+                <button class="key accept" onclick="acceptNumber()">✓</button>
+            </div>
+            <div id="controls">
+                <button class="btn-control" onclick="showBingoAlert()">🏆 BINGO</button>
+                <button class="btn-control reset" onclick="showResetConfirm()">🔄 REINICIAR</button>
+                <button class="btn-control menu" onclick="showMenuConfirm()">🏠 MENÚ</button>
+            </div>
+        </div>
 
-<!-- ---------- App principal ---------- -->
-<div class="app" id="appRoot" aria-hidden="true">
-  <!-- Botón de reinicio en la esquina superior izquierda -->
-  <div class="restart-top-left">
-    <button class="restart-btn" id="btnRestart">↻</button>
-  </div>
-
-  <div class="left">
-    <div id="current-number">--</div>
-    <div class="controls">
-      <div class="number-display" id="numberDisplay">--</div>
-      <div class="virtual-keyboard">
-        <button class="key" data-key="1">1</button>
-        <button class="key" data-key="2">2</button>
-        <button class="key" data-key="3">3</button>
-        <button class="key" data-key="4">4</button>
-        <button class="key" data-key="5">5</button>
-        <button class="key" data-key="6">6</button>
-        <button class="key" data-key="7">7</button>
-        <button class="key" data-key="8">8</button>
-        <button class="key" data-key="9">9</button>
-        <button class="key key-delete" data-key="delete">⌫</button>
-        <button class="key" data-key="0">0</button>
-        <button class="key key-enter" data-key="enter">✓</button>
-      </div>
-      <div class="row">
-        <button class="btn-bingo" id="btnBingo">🎉 Bingo</button>
-      </div>
-      <div class="muted-help">Toca un número marcado para eliminarlo.</div>
+        <!-- Panel Derecho (75%) -->
+        <div id="rightPanel">
+            <div id="board"></div>
+        </div>
     </div>
-  </div>
 
-  <div class="right">
-    <div id="board-container">
-      <div id="board"></div>
+    <!-- Modal personalizado -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle"></h2>
+            <p id="modalMessage"></p>
+            <div id="modalButtons" class="modal-buttons"></div>
+        </div>
     </div>
-  </div>
-</div>
 
-<script>
-const welcomeScreen = document.getElementById('welcomeScreen');
-const appRoot = document.getElementById('appRoot');
-const overlay = document.getElementById('overlay');
-const modalContent = document.getElementById('modalContent');
-const btnIngresar = document.getElementById('btnIngresar');
-const btnInfo = document.getElementById('btnInfo');
-const board = document.getElementById('board');
-const boardContainer = document.getElementById('board-container');
-const currentNumberEl = document.getElementById('current-number');
-const numberDisplay = document.getElementById('numberDisplay');
-const btnBingo = document.getElementById('btnBingo');
-const btnRestart = document.getElementById('btnRestart');
+    <script>
+        let currentInput = '';
+        let maxNumbers = 0;
+        let selectedNumbers = new Set();
 
-let totalNumeros = 90;
-let markedSet = new Set();
-let currentInput = '';
-let resizeTimeout;
+        function showModal(title, message, buttons) {
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalButtons = document.getElementById('modalButtons');
 
-// Función para activar pantalla completa
-function enterFullscreen() {
-  const element = document.documentElement;
-  if (element.requestFullscreen) {
-    element.requestFullscreen();
-  } else if (element.mozRequestFullScreen) {
-    element.mozRequestFullScreen();
-  } else if (element.webkitRequestFullscreen) {
-    element.webkitRequestFullscreen();
-  } else if (element.msRequestFullscreen) {
-    element.msRequestFullscreen();
-  }
-}
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalButtons.innerHTML = '';
 
-// Teclado virtual
-document.querySelectorAll('.key').forEach(key => {
-  key.addEventListener('click', function() {
-    const keyValue = this.getAttribute('data-key');
-    
-    if (keyValue === 'delete') {
-      currentInput = currentInput.slice(0, -1);
-    } else if (keyValue === 'enter') {
-      if (currentInput) {
-        addNumber(parseInt(currentInput));
-        currentInput = '';
-      }
-    } else {
-      // Solo permitir hasta 3 dígitos
-      if (currentInput.length < 3) {
-        currentInput += keyValue;
-      }
-    }
-    
-    updateNumberDisplay();
-  });
-});
+            buttons.forEach(btn => {
+                const button = document.createElement('button');
+                button.className = `modal-btn ${btn.class}`;
+                button.textContent = btn.text;
+                button.onclick = btn.action;
+                modalButtons.appendChild(button);
+            });
 
-function updateNumberDisplay() {
-  numberDisplay.textContent = currentInput || '--';
-}
+            modal.style.display = 'flex';
+        }
 
-/* ---------- Modal ---------- */
-function showModal({ title='', message='', buttons=[{text:'OK',action:()=>closeModal()}] }){
-  const htmlButtons = buttons.map((b,i)=>`<button class="btn ${b.class||'btn-accept'}" data-i="${i}">${b.text}</button>`).join('');
-  modalContent.innerHTML = `<h3>${title}</h3><p>${message}</p><div class="modal-actions">${htmlButtons}</div>`;
-  overlay.classList.add('show');
-  modalContent.querySelectorAll('button').forEach(btn=>{
-    btn.onclick=()=>{buttons[parseInt(btn.dataset.i)].action()};
-  });
-}
-function closeModal(){overlay.classList.remove('show');}
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
 
-/* ---------- Inicio ---------- */
-btnIngresar.onclick=()=>{
-  showModal({
-    title:'Selecciona tipo de bingo',
-    message:'Elige cuántos números tendrá el tablero.',
-    buttons:[
-      {text:'30',action:()=>startGame(30)},
-      {text:'75',action:()=>startGame(75)},
-      {text:'80',action:()=>startGame(80)},
-      {text:'90',action:()=>startGame(90)},
-      {text:'100',action:()=>startGame(100)},
-      {text:'Cancelar',class:'btn-cancel',action:()=>closeModal()}
-    ]
-  });
-};
+        function showNumberSelection() {
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalButtons = document.getElementById('modalButtons');
 
-btnInfo.onclick=()=>{
-  showModal({
-    title:'Instrucciones',
-    message:`1) Usa el teclado para ingresar números.<br>
-             2) Presiona ✓ para marcar el número.<br>
-             3) El número se marcará en el tablero.<br>
-             4) Toca un número marcado para eliminarlo.`,
-    buttons:[{text:'Entendido',action:()=>closeModal()}]
-  });
-};
+            modalTitle.textContent = 'SELECCIÓN DE BINGO';
+            modalMessage.textContent = 'Seleccione la cantidad de números para jugar:';
+            modalButtons.innerHTML = '';
+            
+            const options = [30, 75, 80, 90, 100];
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'number-options';
+            
+            options.forEach(num => {
+                const btn = document.createElement('button');
+                btn.className = 'number-option';
+                btn.textContent = num;
+                btn.onclick = () => startGame(num);
+                optionsDiv.appendChild(btn);
+            });
+            
+            modalButtons.appendChild(optionsDiv);
+            modal.style.display = 'flex';
+        }
 
-/* ---------- Crear tablero ---------- */
-function startGame(n){
-  closeModal();
-  totalNumeros=n;
-  markedSet.clear();
-  board.innerHTML='';
-  currentInput = '';
-  updateNumberDisplay();
-  
-  // Intentar entrar en pantalla completa
-  enterFullscreen();
-  
-  // Crear todos los números
-  for(let i=1;i<=n;i++){
-    const d=document.createElement('div');
-    d.className='number';
-    d.textContent=i;
-    d.id=`num-${i}`;
-    attachClickToRemove(d,i);
-    board.appendChild(d);
-  }
-  
-  welcomeScreen.style.display='none';
-  appRoot.style.display='flex';
-  appRoot.setAttribute('aria-hidden','false');
-  currentNumberEl.textContent='--';
-  
-  // Calcular y aplicar el tamaño óptimo después de un breve delay
-  setTimeout(calculateOptimalBoardSize, 100);
-}
+        function startGame(numbers) {
+            maxNumbers = numbers;
+            closeModal();
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('mainScreen').style.display = 'flex';
+            createBoard();
+        }
 
-// Función para calcular el tamaño óptimo del tablero
-function calculateOptimalBoardSize() {
-  const container = boardContainer;
-  const containerWidth = container.clientWidth;
-  const containerHeight = container.clientHeight;
-  
-  // Calcular el número óptimo de columnas basado en la cantidad de números
-  let columns;
-  if (totalNumeros <= 30) {
-    columns = 6;
-  } else if (totalNumeros <= 50) {
-    columns = 8;
-  } else if (totalNumeros <= 80) {
-    columns = 10;
-  } else {
-    columns = 12; // Para 90-100 números
-  }
-  
-  const rows = Math.ceil(totalNumeros / columns);
-  const gap = 6; // El gap entre celdas
-  
-  // Calcular el tamaño máximo posible de celda
-  const maxCellWidth = (containerWidth - (columns - 1) * gap) / columns;
-  const maxCellHeight = (containerHeight - (rows - 1) * gap) / rows;
-  
-  // Usar el menor de los dos valores para mantener la proporción cuadrada
-  const cellSize = Math.min(maxCellWidth, maxCellHeight);
-  
-  // Asegurarse de que el tamaño no sea demasiado pequeño
-  const minSize = 35;
-  const finalCellSize = Math.max(cellSize, minSize);
-  
-  // Aplicar el tamaño calculado
-  board.style.gridTemplateColumns = `repeat(${columns}, ${finalCellSize}px)`;
-  board.style.gridAutoRows = `${finalCellSize}px`;
-  
-  // Ajustar el tamaño de fuente proporcionalmente
-  const fontSize = Math.max(finalCellSize * 0.35, 14);
-  document.querySelectorAll('.number').forEach(cell => {
-    cell.style.fontSize = `${fontSize}px`;
-  });
-}
+        function createBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            selectedNumbers.clear();
 
-// Recalcular cuando cambia el tamaño de la ventana
-window.addEventListener('resize', function() {
-  clearTimeout(resizeTimeout);
-  resizeTimeout = setTimeout(calculateOptimalBoardSize, 250);
-});
+            const cols = maxNumbers <= 30 ? 6 : maxNumbers <= 75 ? 10 : maxNumbers <= 90 ? 10 : 10;
+            const rows = Math.ceil(maxNumbers / cols);
+            
+            board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            board.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
 
-// Función simplificada para eliminar números con un solo toque
-function attachClickToRemove(el, num) {
-  el.addEventListener('click', function() {
-    if(el.classList.contains('marked')) {
-      showModal({
-        title:'Eliminar número',
-        message:`¿Quitar el número ${num}?`,
-        buttons:[
-          {text:'Eliminar',class:'btn-danger',action:()=>{unmark(num);closeModal();}},
-          {text:'Cancelar',class:'btn-cancel',action:()=>closeModal()}
-        ]
-      });
-    }
-  });
-}
+            for (let i = 1; i <= maxNumbers; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'number-cell';
+                cell.textContent = i;
+                cell.dataset.number = i;
+                cell.onclick = () => toggleNumber(i);
+                board.appendChild(cell);
+            }
+        }
 
-function unmark(n){
-  markedSet.delete(n);
-  const e=document.getElementById(`num-${n}`);
-  if(e)e.classList.remove('marked');
-}
+        function addDigit(digit) {
+            if (currentInput.length < 3) {
+                currentInput += digit;
+                document.getElementById('currentNumber').textContent = currentInput || '-';
+            }
+        }
 
-/* ---------- Aceptar ---------- */
-function addNumber(n){
-  if(isNaN(n)||n<1||n>totalNumeros){
-    showModal({title:'Número inválido',message:`Ingresa un número entre 1 y ${totalNumeros}.`,buttons:[{text:'OK',action:()=>closeModal()}]});
-    return;
-  }
-  if(markedSet.has(n)){
-    showModal({title:'Número repetido',message:`El número ${n} ya fue marcado.`,buttons:[{text:'OK',action:()=>closeModal()}]});
-    return;
-  }
-  markedSet.add(n);
-  document.getElementById(`num-${n}`).classList.add('marked');
-  currentNumberEl.textContent=n;
-  currentInput = '';
-  updateNumberDisplay();
-}
+        function deleteDigit() {
+            currentInput = currentInput.slice(0, -1);
+            document.getElementById('currentNumber').textContent = currentInput || '-';
+        }
 
-/* ---------- Bingo ---------- */
-btnBingo.onclick=()=>{
-  showModal({
-    title:'¡BINGO! 🎉',
-    message:'¡Felicidades! ya no hay premios',
-    buttons:[
-      {text:'Sí, reiniciar',action:()=>{restart();closeModal();}},
-      {text:'Cancelar',class:'btn-cancel',action:()=>closeModal()}
-    ]
-  });
-};
+        function acceptNumber() {
+            const number = parseInt(currentInput);
+            
+            if (!currentInput) {
+                showModal('ERROR', 'Por favor ingrese un número', [
+                    { text: 'OK', class: 'confirm', action: closeModal }
+                ]);
+                return;
+            }
 
-/* ---------- Reiniciar ---------- */
-btnRestart.onclick=()=>{
-  showModal({
-    title:'Opciones',
-    message:'¿Reiniciar o volver al menú principal?',
-    buttons:[
-      {text:'Reiniciar bingo',action:()=>{restart();closeModal();}},
-      {text:'Menú principal',class:'btn-cancel',action:()=>{toMenu();closeModal();}},
-      {text:'Cancelar',class:'btn-cancel',action:()=>closeModal()}
-    ]
-  });
-};
+            if (number < 1 || number > maxNumbers) {
+                showModal('ERROR', `El número debe estar entre 1 y ${maxNumbers}`, [
+                    { text: 'OK', class: 'confirm', action: closeModal }
+                ]);
+                currentInput = '';
+                document.getElementById('currentNumber').textContent = '-';
+                return;
+            }
 
-function restart(){
-  markedSet.forEach(n=>{
-    const e=document.getElementById(`num-${n}`);
-    if(e)e.classList.remove('marked');
-  });
-  markedSet.clear();
-  currentNumberEl.textContent='--';
-  currentInput = '';
-  updateNumberDisplay();
-}
+            if (selectedNumbers.has(number)) {
+                showModal('AVISO', `El número ${number} ya fue seleccionado`, [
+                    { text: 'OK', class: 'neutral', action: closeModal }
+                ]);
+                return;
+            }
 
-function toMenu(){
-  restart();
-  appRoot.style.display='none';
-  welcomeScreen.style.display='flex';
-  appRoot.setAttribute('aria-hidden','true');
-}
-</script>
+            selectedNumbers.add(number);
+            const cell = document.querySelector(`[data-number="${number}"]`);
+            if (cell) {
+                cell.classList.add('selected');
+            }
+            
+            currentInput = '';
+        }
+
+        function toggleNumber(number) {
+            if (selectedNumbers.has(number)) {
+                showModal('CONFIRMACIÓN', `¿Desea eliminar el número ${number}?`, [
+                    { text: 'SÍ', class: 'confirm', action: () => {
+                        selectedNumbers.delete(number);
+                        const cell = document.querySelector(`[data-number="${number}"]`);
+                        if (cell) {
+                            cell.classList.remove('selected');
+                        }
+                        closeModal();
+                    }},
+                    { text: 'NO', class: 'cancel', action: closeModal }
+                ]);
+            }
+        }
+
+        function showBingoAlert() {
+            showModal('🎉 ¡BINGO! 🎉', '¡FELICITACIONES! ¡Alguien ha ganado el BINGO!', [
+                { text: 'REINICIAR', class: 'confirm', action: () => {
+                    resetGame();
+                    closeModal();
+                }},
+                { text: 'CANCELAR', class: 'cancel', action: closeModal }
+            ]);
+        }
+
+        function showResetConfirm() {
+            showModal('CONFIRMACIÓN', '¿Está seguro que desea reiniciar el juego?', [
+                { text: 'SÍ', class: 'confirm', action: () => {
+                    resetGame();
+                    closeModal();
+                }},
+                { text: 'NO', class: 'cancel', action: closeModal }
+            ]);
+        }
+
+        function showMenuConfirm() {
+            showModal('CONFIRMACIÓN', '¿Desea regresar al menú principal?', [
+                { text: 'SÍ', class: 'confirm', action: () => {
+                    closeModal();
+                    document.getElementById('mainScreen').style.display = 'none';
+                    document.getElementById('welcomeScreen').style.display = 'flex';
+                    currentInput = '';
+                    document.getElementById('currentNumber').textContent = '-';
+                }},
+                { text: 'NO', class: 'cancel', action: closeModal }
+            ]);
+        }
+
+        function resetGame() {
+            selectedNumbers.clear();
+            currentInput = '';
+            document.getElementById('currentNumber').textContent = '-';
+            const cells = document.querySelectorAll('.number-cell');
+            cells.forEach(cell => cell.classList.remove('selected'));
+        }
+
+        // Prevenir zoom con gestos
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('gesturechange', function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('gestureend', function(e) {
+            e.preventDefault();
+        });
+
+        // Forzar orientación horizontal al cargar
+        if (window.screen && window.screen.orientation) {
+            window.screen.orientation.lock('landscape').catch(() => {});
+        }
+    </script>
 </body>
 </html>
