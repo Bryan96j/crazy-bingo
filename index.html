@@ -29,7 +29,7 @@
     font-family: Arial, Helvetica, sans-serif;
     background: var(--bg);
     color: var(--text);
-    font-size: 38px;
+    font-size: 42px;
   }
 
   button {font-family:inherit;}
@@ -380,6 +380,7 @@
       <div class="row">
         <button class="btn-bingo" id="btnBingo">🎉 Bingo</button>
       </div>
+      <div class="muted-help">Toca un número marcado para eliminarlo.</div>
     </div>
   </div>
 
@@ -408,6 +409,20 @@ let totalNumeros = 90;
 let markedSet = new Set();
 let currentInput = '';
 let resizeTimeout;
+
+// Función para activar pantalla completa
+function enterFullscreen() {
+  const element = document.documentElement;
+  if (element.requestFullscreen) {
+    element.requestFullscreen();
+  } else if (element.mozRequestFullScreen) {
+    element.mozRequestFullScreen();
+  } else if (element.webkitRequestFullscreen) {
+    element.webkitRequestFullscreen();
+  } else if (element.msRequestFullscreen) {
+    element.msRequestFullscreen();
+  }
+}
 
 // Teclado virtual
 document.querySelectorAll('.key').forEach(key => {
@@ -467,7 +482,8 @@ btnInfo.onclick=()=>{
   showModal({
     title:'Instrucciones',
     message:`1) Usa el teclado para ingresar números.<br>
-             2) El número se marcará en el tablero.<br>
+             2) Presiona ✓ para marcar el número.<br>
+             3) El número se marcará en el tablero.<br>
              4) Toca un número marcado para eliminarlo.`,
     buttons:[{text:'Entendido',action:()=>closeModal()}]
   });
@@ -481,6 +497,9 @@ function startGame(n){
   board.innerHTML='';
   currentInput = '';
   updateNumberDisplay();
+  
+  // Intentar entrar en pantalla completa
+  enterFullscreen();
   
   // Crear todos los números
   for(let i=1;i<=n;i++){
