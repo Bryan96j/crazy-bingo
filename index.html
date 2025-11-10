@@ -29,7 +29,7 @@
     font-family: Arial, Helvetica, sans-serif;
     background: var(--bg);
     color: var(--text);
-    font-size: 42px;
+    font-size: 38px;
   }
 
   button {font-family:inherit;}
@@ -38,6 +38,7 @@
     display:flex;
     height:100vh;
     width:100vw;
+    position: relative;
   }
 
   /* ---------- Bienvenida ---------- */
@@ -130,7 +131,7 @@
   .right {
     width:75%;
     padding:10px;
-    overflow: hidden; /* Cambiado para evitar scroll */
+    overflow: hidden;
     display: flex;
     flex-direction: column;
   }
@@ -236,7 +237,7 @@
 
   #board {
     display: grid;
-    gap: 4px;
+    gap: 6px;
     justify-items: center;
     align-items: center;
     margin: auto;
@@ -247,37 +248,54 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #eee;
+    background: #ffffff;
     color: #000;
-    border-radius: 4px;
-    border: 1px solid #ccc;
+    border-radius: 8px;
+    border: 2px solid #cccccc;
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-weight: bold;
     /* El tamaño se calculará dinámicamente con JavaScript */
+    width: 100%;
+    height: 100%;
   }
+  
+  .number:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+  
   .number.marked {
     background: var(--highlight);
     color: #000;
     font-weight: bold;
     border-color: #000;
-    transform: scale(1.1);
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(0, 255, 47, 0.5);
   }
 
-  .restart-fixed {
-    position:fixed;
-    left:10px;
-    bottom:10px;
-    z-index:80;
+  /* Botón de reinicio en la esquina superior izquierda */
+  .restart-top-left {
+    position: absolute;
+    left: 15px;
+    top: 15px;
+    z-index: 80;
   }
+  
   .restart-btn {
-    width:40px;
-    height:40px;
-    border-radius:50%;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
     background: var(--primary);
-    color:#fff;
-    font-size:20px;
-    border:none;
-    cursor:pointer;
+    color: #fff;
+    font-size: 24px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .muted-help{color:var(--muted);font-size:10px;text-align:center;}
@@ -295,6 +313,21 @@
     
     .virtual-keyboard {
       max-width: 100%;
+    }
+    
+    #board {
+      gap: 4px;
+    }
+    
+    .restart-top-left {
+      left: 10px;
+      top: 10px;
+    }
+    
+    .restart-btn {
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
     }
   }
 </style>
@@ -321,6 +354,11 @@
 
 <!-- ---------- App principal ---------- -->
 <div class="app" id="appRoot" aria-hidden="true">
+  <!-- Botón de reinicio en la esquina superior izquierda -->
+  <div class="restart-top-left">
+    <button class="restart-btn" id="btnRestart">↻</button>
+  </div>
+
   <div class="left">
     <div id="current-number">--</div>
     <div class="controls">
@@ -342,7 +380,6 @@
       <div class="row">
         <button class="btn-bingo" id="btnBingo">🎉 Bingo</button>
       </div>
-      <div class="muted-help">Mantén presionado un número 5s para eliminarlo.</div>
     </div>
   </div>
 
@@ -351,10 +388,6 @@
       <div id="board"></div>
     </div>
   </div>
-</div>
-
-<div class="restart-fixed">
-  <button class="restart-btn" id="btnRestart">↻</button>
 </div>
 
 <script>
@@ -373,7 +406,6 @@ const btnRestart = document.getElementById('btnRestart');
 
 let totalNumeros = 90;
 let markedSet = new Set();
-let longPressDuration = 5000;
 let currentInput = '';
 let resizeTimeout;
 
@@ -435,9 +467,8 @@ btnInfo.onclick=()=>{
   showModal({
     title:'Instrucciones',
     message:`1) Usa el teclado para ingresar números.<br>
-             2) Presiona ✓ para marcar el número.<br>
-             3) El número se marcará en el tablero.<br>
-             4) Mantén presionado un número 5s para eliminarlo.`,
+             2) El número se marcará en el tablero.<br>
+             4) Toca un número marcado para eliminarlo.`,
     buttons:[{text:'Entendido',action:()=>closeModal()}]
   });
 };
@@ -457,7 +488,7 @@ function startGame(n){
     d.className='number';
     d.textContent=i;
     d.id=`num-${i}`;
-    attachLongPress(d,i);
+    attachClickToRemove(d,i);
     board.appendChild(d);
   }
   
@@ -489,7 +520,7 @@ function calculateOptimalBoardSize() {
   }
   
   const rows = Math.ceil(totalNumeros / columns);
-  const gap = 4; // El gap entre celdas
+  const gap = 6; // El gap entre celdas
   
   // Calcular el tamaño máximo posible de celda
   const maxCellWidth = (containerWidth - (columns - 1) * gap) / columns;
@@ -499,7 +530,7 @@ function calculateOptimalBoardSize() {
   const cellSize = Math.min(maxCellWidth, maxCellHeight);
   
   // Asegurarse de que el tamaño no sea demasiado pequeño
-  const minSize = 20;
+  const minSize = 35;
   const finalCellSize = Math.max(cellSize, minSize);
   
   // Aplicar el tamaño calculado
@@ -507,7 +538,7 @@ function calculateOptimalBoardSize() {
   board.style.gridAutoRows = `${finalCellSize}px`;
   
   // Ajustar el tamaño de fuente proporcionalmente
-  const fontSize = Math.max(finalCellSize * 0.4, 12);
+  const fontSize = Math.max(finalCellSize * 0.35, 14);
   document.querySelectorAll('.number').forEach(cell => {
     cell.style.fontSize = `${fontSize}px`;
   });
@@ -519,11 +550,10 @@ window.addEventListener('resize', function() {
   resizeTimeout = setTimeout(calculateOptimalBoardSize, 250);
 });
 
-function attachLongPress(el,num){
-  let timer;
-  const start=()=>{
-    if(!el.classList.contains('marked'))return;
-    timer=setTimeout(()=>{
+// Función simplificada para eliminar números con un solo toque
+function attachClickToRemove(el, num) {
+  el.addEventListener('click', function() {
+    if(el.classList.contains('marked')) {
       showModal({
         title:'Eliminar número',
         message:`¿Quitar el número ${num}?`,
@@ -532,15 +562,8 @@ function attachLongPress(el,num){
           {text:'Cancelar',class:'btn-cancel',action:()=>closeModal()}
         ]
       });
-    },longPressDuration);
-  };
-  const cancel=()=>clearTimeout(timer);
-  el.addEventListener('mousedown',start);
-  el.addEventListener('mouseup',cancel);
-  el.addEventListener('mouseleave',cancel);
-  el.addEventListener('touchstart',start);
-  el.addEventListener('touchend',cancel);
-  el.addEventListener('touchcancel',cancel);
+    }
+  });
 }
 
 function unmark(n){
