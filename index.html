@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen">
-    <meta name="theme-color" content="#1e3a5f">
+    <meta name="theme-color" content="#667eea">
     <title>Bingo</title>
     <style>
         * {
@@ -17,8 +17,8 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+            font-family: 'Arial Black', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #fff;
             overflow: hidden;
             width: 100vw;
@@ -39,26 +39,33 @@
         }
 
         #welcomeScreen h1 {
-            font-size: clamp(2rem, 8vw, 6rem);
+            font-size: clamp(3rem, 10vw, 7rem);
             margin-bottom: 3vh;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 3px 3px 0 #764ba2;
+            letter-spacing: 5px;
+            color: white;
         }
 
         .btn-primary {
-            background: #4CAF50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             padding: clamp(15px, 3vh, 30px) clamp(30px, 6vw, 60px);
             font-size: clamp(1.2rem, 3vw, 2.5rem);
-            border-radius: 15px;
+            border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
             font-weight: bold;
         }
 
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+
         .btn-primary:active {
-            transform: scale(0.95);
+            transform: translateY(-1px);
         }
 
         /* Pantalla Principal */
@@ -71,7 +78,7 @@
 
         #leftPanel {
             width: 25%;
-            background: #2c5282;
+            background: rgba(118, 75, 162, 0.3);
             display: flex;
             flex-direction: column;
             padding: 1vh;
@@ -80,15 +87,15 @@
 
         #currentNumber {
             flex: 0 0 40%;
-            background: #fff;
-            color: #1e3a5f;
+            background: white;
+            color: #667eea;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: clamp(7rem, 24vh, 16rem);
             font-weight: bold;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
 
         #keyboard {
@@ -99,20 +106,24 @@
         }
 
         .key {
-            background: #4a90e2;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: clamp(1.5rem, 4vh, 3rem);
             font-weight: bold;
             color: white;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            transition: transform 0.1s;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .key:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
         }
 
         .key:active {
-            transform: scale(0.95);
-            background: #357abd;
+            transform: translateY(-1px);
         }
 
         .key.wide {
@@ -120,19 +131,11 @@
         }
 
         .key.accept {
-            background: #4CAF50;
-        }
-
-        .key.accept:active {
-            background: #45a049;
+            background: linear-gradient(135deg, #654caf 0%, #5c3ebc 100%);
         }
 
         .key.delete {
-            background: #f44336;
-        }
-
-        .key.delete:active {
-            background: #da190b;
+            background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
         }
 
         #controls {
@@ -144,53 +147,63 @@
 
         .btn-control {
             flex: 1;
-            background: #4CAF50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: clamp(1rem, 2.5vh, 2rem);
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            transition: transform 0.1s;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-control:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
         }
 
         .btn-control:active {
-            transform: scale(0.95);
+            transform: translateY(-1px);
         }
 
         .btn-control.reset {
-            background: #ff9800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .btn-control.menu {
-            background: #9e9e9e;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         /* Botón GIRAR para modo tradicional */
         #spinButton {
             flex: 0 0 40%;
-            background: #4CAF50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 15px;
             font-size: clamp(2rem, 6vh, 4rem);
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
             display: none;
             align-items: center;
             justify-content: center;
         }
 
+        #spinButton:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(76, 175, 80, 0.6);
+        }
+
         #spinButton:active {
-            transform: scale(0.95);
+            transform: translateY(-1px);
         }
 
         #rightPanel {
             width: 75%;
-            background: #1e3a5f;
+            background: rgba(118, 75, 162, 0.2);
             padding: 1vh;
             display: flex;
             justify-content: center;
@@ -203,26 +216,34 @@
             width: 100%;
             height: 100%;
             padding: 1vh;
+            background: rgba(240, 240, 240, 0.1);
+            border-radius: 15px;
         }
 
         .number-cell {
-            background: #fff;
-            color: #1e3a5f;
+            background: white;
+            color: #667eea;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: clamp(1rem, 6vh, 3rem);
             font-weight: bold;
-            border-radius: 8px;
+            border-radius: 10px;
+            border: 3px solid #667eea;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .number-cell:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
         }
 
         .number-cell.selected {
-            background: #4CAF50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            transform: scale(0.95);
+            border-color: #764ba2;
         }
 
         /* Modal personalizado */
@@ -233,30 +254,33 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.7);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
 
         .modal-content {
-            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+            background: white;
             padding: clamp(20px, 4vh, 40px);
-            border-radius: 15px;
+            border-radius: 20px;
             text-align: center;
             min-width: 60vw;
             max-width: 80vw;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
         }
 
         .modal-content h2 {
             font-size: clamp(1.5rem, 4vh, 3rem);
             margin-bottom: 2vh;
+            color: #667eea;
+            text-shadow: 2px 2px 0 #764ba2;
         }
 
         .modal-content p {
             font-size: clamp(1.2rem, 3vh, 2rem);
             margin-bottom: 3vh;
+            color: #764ba2;
         }
 
         .modal-buttons {
@@ -270,25 +294,35 @@
             padding: clamp(10px, 2vh, 20px) clamp(20px, 4vw, 40px);
             font-size: clamp(1rem, 2.5vh, 2rem);
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
             min-width: 120px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+
+        .modal-btn:active {
+            transform: translateY(-1px);
         }
 
         .modal-btn.confirm {
-            background: #4CAF50;
+            background: linear-gradient(1135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
         .modal-btn.cancel {
-            background: #f44336;
+            background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
             color: white;
         }
 
         .modal-btn.neutral {
-            background: #2196F3;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
@@ -303,18 +337,24 @@
         .number-option {
             padding: clamp(15px, 3vh, 25px) clamp(25px, 5vw, 40px);
             font-size: clamp(1.5rem, 3.5vh, 2.5rem);
-            background: #4a90e2;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 15px;
             cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
             min-width: 100px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .number-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
         }
 
         .number-option:active {
-            transform: scale(0.95);
+            transform: translateY(-1px);
         }
 
         /* Modal de Giro - Esfera */
@@ -336,11 +376,11 @@
             width: clamp(250px, 50vh, 500px);
             height: clamp(250px, 50vh, 500px);
             border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #fff, #4a90e2, #1e3a5f);
+            background: radial-gradient(circle at 30% 30%, #fff, #667eea, #764ba2);
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 50px rgba(74, 144, 226, 0.8),
+            box-shadow: 0 0 50px rgba(102, 126, 234, 0.8),
                         inset 0 0 50px rgba(255, 255, 255, 0.3);
             position: relative;
             overflow: hidden;
@@ -359,7 +399,7 @@
         }
 
         .spin-number {
-            font-size: clamp(4rem, 40vh, 11rem);
+            font-size: clamp(6rem, 50vh, 14rem);
             font-weight: bold;
             color: white;
             text-shadow: 0 0 20px rgba(0,0,0,0.5);
@@ -379,18 +419,23 @@
             margin-top: 3vh;
             padding: clamp(15px, 3vh, 25px) clamp(40px, 8vw, 80px);
             font-size: clamp(1.5rem, 3vh, 2.5rem);
-            background: #4CAF50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 50px;
             cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
+            box-shadow: 0 10px 30px rgba(140, 109, 234, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .spin-accept-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(140, 109, 234, 0.4);
         }
 
         .spin-accept-btn:active {
-            transform: scale(0.95);
+            transform: translateY(-1px);
         }
 
         .mode-selection {
@@ -403,19 +448,24 @@
         .mode-btn {
             padding: clamp(20px, 4vh, 35px) clamp(30px, 6vw, 50px);
             font-size: clamp(1.3rem, 3vh, 2.2rem);
-            background: #4a90e2;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 15px;
             cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
             min-width: 250px;
         }
 
+        .mode-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+
         .mode-btn:active {
-            transform: scale(0.95);
+            transform: translateY(-1px);
         }
     </style>
 </head>
@@ -487,11 +537,10 @@
         let currentInput = '';
         let maxNumbers = 0;
         let selectedNumbers = new Set();
-        let gameMode = ''; // 'digital' o 'traditional'
+        let gameMode = '';
         let currentSpinNumber = null;
         let availableNumbers = [];
 
-        // Sonidos usando Web Audio API
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         
         function playSound(type) {
@@ -535,7 +584,6 @@
             }
         }
 
-        // Agregar sonido a todos los botones
         document.addEventListener('click', function(e) {
             if (e.target.tagName === 'BUTTON') {
                 playSound('click');
@@ -627,7 +675,6 @@
             gameMode = mode;
             closeModal();
             
-            // Inicializar números disponibles para modo tradicional
             availableNumbers = [];
             for (let i = 1; i <= maxNumbers; i++) {
                 availableNumbers.push(i);
@@ -636,7 +683,6 @@
             document.getElementById('welcomeScreen').style.display = 'none';
             document.getElementById('mainScreen').style.display = 'flex';
             
-            // Mostrar/ocultar elementos según el modo
             if (mode === 'digital') {
                 document.getElementById('keyboard').style.display = 'grid';
                 document.getElementById('spinButton').style.display = 'none';
@@ -737,7 +783,6 @@
             acceptBtn.style.display = 'none';
             spinningNumber.classList.add('spinning');
             
-            // Animación de giro durante 8 segundos
             let elapsed = 0;
             const duration = 8000;
             const interval = 100;
@@ -745,21 +790,19 @@
             const spinInterval = setInterval(() => {
                 const randomIndex = Math.floor(Math.random() * availableNumbers.length);
                 spinningNumber.textContent = availableNumbers[randomIndex];
-                playSound('spinning'); // Sonido continuo durante el giro
+                playSound('spinning');
                 elapsed += interval;
                 
                 if (elapsed >= duration) {
                     clearInterval(spinInterval);
                     
-                    // Seleccionar número final
                     const finalIndex = Math.floor(Math.random() * availableNumbers.length);
                     currentSpinNumber = availableNumbers[finalIndex];
                     spinningNumber.textContent = currentSpinNumber;
                     spinningNumber.classList.remove('spinning');
                     
-                    playSound('accept'); // Sonido de finalización
+                    playSound('accept');
                     
-                    // Mostrar botón de aceptar
                     acceptBtn.style.display = 'block';
                 }
             }, interval);
@@ -770,23 +813,19 @@
             
             playSound('accept');
             
-            // Agregar número al tablero
             selectedNumbers.add(currentSpinNumber);
             const cell = document.querySelector(`[data-number="${currentSpinNumber}"]`);
             if (cell) {
                 cell.classList.add('selected');
             }
             
-            // Mostrar en el display principal
             document.getElementById('currentNumber').textContent = currentSpinNumber;
             
-            // Remover de números disponibles
             const index = availableNumbers.indexOf(currentSpinNumber);
             if (index > -1) {
                 availableNumbers.splice(index, 1);
             }
             
-            // Cerrar modal
             document.getElementById('spinModal').style.display = 'none';
             currentSpinNumber = null;
         }
@@ -801,7 +840,6 @@
                             cell.classList.remove('selected');
                         }
                         
-                        // Si es modo tradicional, devolver el número a disponibles
                         if (gameMode === 'traditional' && !availableNumbers.includes(number)) {
                             availableNumbers.push(number);
                             availableNumbers.sort((a, b) => a - b);
@@ -854,7 +892,6 @@
             const cells = document.querySelectorAll('.number-cell');
             cells.forEach(cell => cell.classList.remove('selected'));
             
-            // Reiniciar números disponibles para modo tradicional
             if (gameMode === 'traditional') {
                 availableNumbers = [];
                 for (let i = 1; i <= maxNumbers; i++) {
@@ -863,7 +900,6 @@
             }
         }
 
-        // Prevenir zoom con gestos
         document.addEventListener('gesturestart', function(e) {
             e.preventDefault();
         });
@@ -876,11 +912,9 @@
             e.preventDefault();
         });
 
-        // Forzar orientación horizontal al cargar
         if (window.screen && window.screen.orientation) {
             window.screen.orientation.lock('landscape').catch(() => {});
         }
     </script>
 </body>
 </html>
-
