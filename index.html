@@ -593,12 +593,14 @@
         }
 
         function playNumberAudio(number) {
-            if (!audioSettings.numberAudio || gameMode !== 'traditional') {
-                return;
-            }
-            const audio = new Audio(`music/${number}.mp3`);
-            audio.play().catch(error => {
-                console.log('No se pudo reproducir el audio del número:', error);
+            if (!audioSettings.numberAudio || gameMode !== 'traditional') return;
+            
+            const audio = new Audio();
+            audio.src = `music/${number}.mp3`;
+            audio.preload = 'auto';
+            
+            audio.play().catch(err => {
+                console.error(`Error reproduciendo music/${number}.mp3`, err);
             });
         }
 
@@ -948,3 +950,4 @@
     </script>
 </body>
 </html>
+
