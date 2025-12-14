@@ -26,7 +26,6 @@
             position: fixed;
         }
 
-        /* Pantalla de Bienvenida */
         #welcomeScreen {
             display: flex;
             flex-direction: column;
@@ -68,7 +67,6 @@
             transform: translateY(-1px);
         }
 
-        /* Pantalla Principal */
         #mainScreen {
             display: none;
             height: 100vh;
@@ -126,10 +124,6 @@
             transform: translateY(-1px);
         }
 
-        .key.wide {
-            grid-column: span 2;
-        }
-
         .key.accept {
             background: linear-gradient(135deg, #654caf 0%, #5c3ebc 100%);
         }
@@ -167,15 +161,6 @@
             transform: translateY(-1px);
         }
 
-        .btn-control.reset {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .btn-control.menu {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        /* Botón GIRAR para modo tradicional */
         #spinButton {
             flex: 0 0 40%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -246,7 +231,6 @@
             border-color: #764ba2;
         }
 
-        /* Modal personalizado */
         .modal {
             display: none;
             position: fixed;
@@ -312,7 +296,7 @@
         }
 
         .modal-btn.confirm {
-            background: linear-gradient(1135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
@@ -357,7 +341,6 @@
             transform: translateY(-1px);
         }
 
-        /* Modal de Giro - Esfera */
         .spin-modal {
             display: none;
             position: fixed;
@@ -467,26 +450,51 @@
         .mode-btn:active {
             transform: translateY(-1px);
         }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 3vh;
+            margin: 3vh 0;
+            text-align: left;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 2vw;
+            padding: clamp(15px, 3vh, 25px);
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            border: 2px solid #667eea;
+        }
+
+        .option-item label {
+            font-size: clamp(1.2rem, 2.5vh, 2rem);
+            color: #667eea;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .option-item input[type="checkbox"] {
+            width: clamp(30px, 5vh, 50px);
+            height: clamp(30px, 5vh, 50px);
+            cursor: pointer;
+            accent-color: #667eea;
+        }
     </style>
 </head>
 <body>
-    <!-- Pantalla de Bienvenida -->
     <div id="welcomeScreen">
         <h1>🎉 BINGO 🎉</h1>
         <button class="btn-primary" onclick="showNumberSelection()">INGRESAR</button>
     </div>
 
-    <!-- Pantalla Principal -->
     <div id="mainScreen">
-        <!-- Panel Izquierdo (25%) -->
         <div id="leftPanel">
-            <!-- Número actual -->
             <div id="currentNumber">-</div>
-            
-            <!-- Botón GIRAR (solo para modo tradicional) -->
             <button id="spinButton" onclick="spinNumber()">🎲 GIRAR</button>
-            
-            <!-- Teclado (solo para modo digital) -->
             <div id="keyboard">
                 <button class="key" onclick="addDigit('1')">1</button>
                 <button class="key" onclick="addDigit('2')">2</button>
@@ -501,22 +509,18 @@
                 <button class="key" onclick="addDigit('0')">0</button>
                 <button class="key accept" onclick="acceptNumber()">✓</button>
             </div>
-            
-            <!-- Controles -->
             <div id="controls">
                 <button class="btn-control" onclick="showBingoAlert()">🏆 BINGO</button>
                 <button class="btn-control reset" onclick="showResetConfirm()">🔄 REINICIAR</button>
                 <button class="btn-control menu" onclick="showMenuConfirm()">🏠 MENÚ</button>
+                <button class="btn-control" onclick="showOptions()">⚙️ OPCIONES</button>
             </div>
         </div>
-
-        <!-- Panel Derecho (75%) -->
         <div id="rightPanel">
             <div id="board"></div>
         </div>
     </div>
 
-    <!-- Modal personalizado -->
     <div id="modal" class="modal">
         <div class="modal-content">
             <h2 id="modalTitle"></h2>
@@ -525,7 +529,6 @@
         </div>
     </div>
 
-    <!-- Modal de Giro -->
     <div id="spinModal" class="spin-modal">
         <div class="spin-sphere">
             <div id="spinningNumber" class="spin-number">-</div>
@@ -540,16 +543,21 @@
         let gameMode = '';
         let currentSpinNumber = null;
         let availableNumbers = [];
+        let audioSettings = {
+            numberAudio: true,
+            spinningSound: true
+        };
 
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         
         function playSound(type) {
+            if (type === 'spinning' && !audioSettings.spinningSound) {
+                return;
+            }
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-            
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            
             switch(type) {
                 case 'click':
                     oscillator.frequency.value = 800;
@@ -584,6 +592,16 @@
             }
         }
 
+        function playNumberAudio(number) {
+            if (!audioSettings.numberAudio || gameMode !== 'traditional') {
+                return;
+            }
+            const audio = new Audio(`music/${number}.mp3`);
+            audio.play().catch(error => {
+                console.log('No se pudo reproducir el audio del número:', error);
+            });
+        }
+
         document.addEventListener('click', function(e) {
             if (e.target.tagName === 'BUTTON') {
                 playSound('click');
@@ -595,11 +613,9 @@
             const modalTitle = document.getElementById('modalTitle');
             const modalMessage = document.getElementById('modalMessage');
             const modalButtons = document.getElementById('modalButtons');
-
             modalTitle.textContent = title;
             modalMessage.textContent = message;
             modalButtons.innerHTML = '';
-
             buttons.forEach(btn => {
                 const button = document.createElement('button');
                 button.className = `modal-btn ${btn.class}`;
@@ -607,7 +623,6 @@
                 button.onclick = btn.action;
                 modalButtons.appendChild(button);
             });
-
             modal.style.display = 'flex';
         }
 
@@ -615,20 +630,69 @@
             document.getElementById('modal').style.display = 'none';
         }
 
+        function showOptions() {
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalButtons = document.getElementById('modalButtons');
+            modalTitle.textContent = '⚙️ OPCIONES DE AUDIO';
+            modalMessage.textContent = 'Configura las opciones de sonido:';
+            modalButtons.innerHTML = '';
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-container';
+            const option1 = document.createElement('div');
+            option1.className = 'option-item';
+            const checkbox1 = document.createElement('input');
+            checkbox1.type = 'checkbox';
+            checkbox1.id = 'numberAudioCheck';
+            checkbox1.checked = audioSettings.numberAudio;
+            checkbox1.onchange = function() {
+                audioSettings.numberAudio = this.checked;
+            };
+            const label1 = document.createElement('label');
+            label1.htmlFor = 'numberAudioCheck';
+            label1.textContent = '🔊 Audio de números al salir';
+            option1.appendChild(checkbox1);
+            option1.appendChild(label1);
+            const option2 = document.createElement('div');
+            option2.className = 'option-item';
+            const checkbox2 = document.createElement('input');
+            checkbox2.type = 'checkbox';
+            checkbox2.id = 'spinSoundCheck';
+            checkbox2.checked = audioSettings.spinningSound;
+            checkbox2.onchange = function() {
+                audioSettings.spinningSound = this.checked;
+            };
+            const label2 = document.createElement('label');
+            label2.htmlFor = 'spinSoundCheck';
+            label2.textContent = '🎵 Sonido durante el giro';
+            option2.appendChild(checkbox2);
+            option2.appendChild(label2);
+            optionsDiv.appendChild(option1);
+            optionsDiv.appendChild(option2);
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.className = 'modal-buttons';
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'modal-btn confirm';
+            closeBtn.textContent = 'CERRAR';
+            closeBtn.onclick = closeModal;
+            buttonsDiv.appendChild(closeBtn);
+            modalButtons.appendChild(optionsDiv);
+            modalButtons.appendChild(buttonsDiv);
+            modal.style.display = 'flex';
+        }
+
         function showNumberSelection() {
             const modal = document.getElementById('modal');
             const modalTitle = document.getElementById('modalTitle');
             const modalMessage = document.getElementById('modalMessage');
             const modalButtons = document.getElementById('modalButtons');
-
             modalTitle.textContent = 'SELECCIÓN DE BINGO';
             modalMessage.textContent = 'Seleccione la cantidad de números para jugar:';
             modalButtons.innerHTML = '';
-            
             const options = [30, 75, 80, 90, 100];
             const optionsDiv = document.createElement('div');
             optionsDiv.className = 'number-options';
-            
             options.forEach(num => {
                 const btn = document.createElement('button');
                 btn.className = 'number-option';
@@ -636,7 +700,6 @@
                 btn.onclick = () => showModeSelection(num);
                 optionsDiv.appendChild(btn);
             });
-            
             modalButtons.appendChild(optionsDiv);
             modal.style.display = 'flex';
         }
@@ -646,24 +709,19 @@
             const modalTitle = document.getElementById('modalTitle');
             const modalMessage = document.getElementById('modalMessage');
             const modalButtons = document.getElementById('modalButtons');
-
             modalTitle.textContent = 'MODO DE JUEGO';
             modalMessage.textContent = 'Seleccione el modo de juego:';
             modalButtons.innerHTML = '';
-            
             const modeDiv = document.createElement('div');
             modeDiv.className = 'mode-selection';
-            
             const digitalBtn = document.createElement('button');
             digitalBtn.className = 'mode-btn';
             digitalBtn.textContent = '📱 BINGO TABLERO DIGITAL';
             digitalBtn.onclick = () => startGame(numbers, 'digital');
-            
             const traditionalBtn = document.createElement('button');
             traditionalBtn.className = 'mode-btn';
             traditionalBtn.textContent = '🎱 BINGO JUEGO TRADICIONAL';
             traditionalBtn.onclick = () => startGame(numbers, 'traditional');
-            
             modeDiv.appendChild(digitalBtn);
             modeDiv.appendChild(traditionalBtn);
             modalButtons.appendChild(modeDiv);
@@ -674,15 +732,12 @@
             maxNumbers = numbers;
             gameMode = mode;
             closeModal();
-            
             availableNumbers = [];
             for (let i = 1; i <= maxNumbers; i++) {
                 availableNumbers.push(i);
             }
-            
             document.getElementById('welcomeScreen').style.display = 'none';
             document.getElementById('mainScreen').style.display = 'flex';
-            
             if (mode === 'digital') {
                 document.getElementById('keyboard').style.display = 'grid';
                 document.getElementById('spinButton').style.display = 'none';
@@ -692,7 +747,6 @@
                 document.getElementById('spinButton').style.display = 'flex';
                 document.getElementById('currentNumber').style.flex = '0 0 20%';
             }
-            
             createBoard();
         }
 
@@ -700,13 +754,10 @@
             const board = document.getElementById('board');
             board.innerHTML = '';
             selectedNumbers.clear();
-
             const cols = maxNumbers <= 30 ? 6 : maxNumbers <= 75 ? 10 : maxNumbers <= 90 ? 10 : 10;
             const rows = Math.ceil(maxNumbers / cols);
-            
             board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
             board.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-
             for (let i = 1; i <= maxNumbers; i++) {
                 const cell = document.createElement('div');
                 cell.className = 'number-cell';
@@ -731,14 +782,12 @@
 
         function acceptNumber() {
             const number = parseInt(currentInput);
-            
             if (!currentInput) {
                 showModal('ERROR', 'Por favor ingrese un número', [
                     { text: 'OK', class: 'confirm', action: closeModal }
                 ]);
                 return;
             }
-
             if (number < 1 || number > maxNumbers) {
                 showModal('ERROR', `El número debe estar entre 1 y ${maxNumbers}`, [
                     { text: 'OK', class: 'confirm', action: closeModal }
@@ -747,21 +796,18 @@
                 document.getElementById('currentNumber').textContent = '-';
                 return;
             }
-
             if (selectedNumbers.has(number)) {
                 showModal('AVISO', `El número ${number} ya fue seleccionado`, [
                     { text: 'OK', class: 'neutral', action: closeModal }
                 ]);
                 return;
             }
-
             playSound('accept');
             selectedNumbers.add(number);
             const cell = document.querySelector(`[data-number="${number}"]`);
             if (cell) {
                 cell.classList.add('selected');
             }
-            
             currentInput = '';
         }
 
@@ -772,37 +818,29 @@
                 ]);
                 return;
             }
-
             playSound('spin');
-            
             const spinModal = document.getElementById('spinModal');
             const spinningNumber = document.getElementById('spinningNumber');
             const acceptBtn = document.getElementById('spinAcceptBtn');
-            
             spinModal.style.display = 'flex';
             acceptBtn.style.display = 'none';
             spinningNumber.classList.add('spinning');
-            
             let elapsed = 0;
             const duration = 8000;
             const interval = 100;
-            
             const spinInterval = setInterval(() => {
                 const randomIndex = Math.floor(Math.random() * availableNumbers.length);
                 spinningNumber.textContent = availableNumbers[randomIndex];
                 playSound('spinning');
                 elapsed += interval;
-                
                 if (elapsed >= duration) {
                     clearInterval(spinInterval);
-                    
                     const finalIndex = Math.floor(Math.random() * availableNumbers.length);
                     currentSpinNumber = availableNumbers[finalIndex];
                     spinningNumber.textContent = currentSpinNumber;
                     spinningNumber.classList.remove('spinning');
-                    
                     playSound('accept');
-                    
+                    playNumberAudio(currentSpinNumber);
                     acceptBtn.style.display = 'block';
                 }
             }, interval);
@@ -810,22 +848,17 @@
 
         function acceptSpinNumber() {
             if (currentSpinNumber === null) return;
-            
             playSound('accept');
-            
             selectedNumbers.add(currentSpinNumber);
             const cell = document.querySelector(`[data-number="${currentSpinNumber}"]`);
             if (cell) {
                 cell.classList.add('selected');
             }
-            
             document.getElementById('currentNumber').textContent = currentSpinNumber;
-            
             const index = availableNumbers.indexOf(currentSpinNumber);
             if (index > -1) {
                 availableNumbers.splice(index, 1);
             }
-            
             document.getElementById('spinModal').style.display = 'none';
             currentSpinNumber = null;
         }
@@ -839,12 +872,10 @@
                         if (cell) {
                             cell.classList.remove('selected');
                         }
-                        
                         if (gameMode === 'traditional' && !availableNumbers.includes(number)) {
                             availableNumbers.push(number);
                             availableNumbers.sort((a, b) => a - b);
                         }
-                        
                         closeModal();
                     }},
                     { text: 'NO', class: 'cancel', action: closeModal }
@@ -891,7 +922,6 @@
             document.getElementById('currentNumber').textContent = '-';
             const cells = document.querySelectorAll('.number-cell');
             cells.forEach(cell => cell.classList.remove('selected'));
-            
             if (gameMode === 'traditional') {
                 availableNumbers = [];
                 for (let i = 1; i <= maxNumbers; i++) {
