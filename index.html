@@ -596,8 +596,9 @@
             if (!audioSettings.numberAudio || gameMode !== 'traditional') {
                 return;
             }
-            // Usa la ruta completa del repositorio de GitHub
-            const audio = new Audio(`./music/${number}.mp3`);
+            // Obtiene la URL base actual
+            const baseURL = window.location.origin + window.location.pathname.replace('index.html', '');
+            const audio = new Audio(`${baseURL}music/${number}.mp3`);
             audio.play().catch(error => {
                 console.log('No se pudo reproducir el audio del número:', error);
             });
@@ -949,5 +950,6 @@
     </script>
 </body>
 </html>
+
 
 
